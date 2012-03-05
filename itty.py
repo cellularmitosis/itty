@@ -317,10 +317,11 @@ def find_matching_url(request):
     if not request.method in REQUEST_MAPPINGS:
         raise NotFound("The HTTP request method '%s' is not supported." % request.method)
 
-    for url_set in REQUEST_MAPPINGS[request.method]:
-        match = url_set[0].search(request.path)
+    for method in REQUEST_MAPPINGS[request.method]:
+        match = method.re_url.search(request.path)
 
         if match is not None:
+            url_set = (method.re_url, method.url, method)
             return (url_set, match.groupdict())
 
     raise NotFound("Sorry, nothing here.")
@@ -405,8 +406,9 @@ def get(url):
     """Registers a method as capable of processing GET requests."""
     def wrapped(method):
         # Register.
-        re_url = re.compile("^%s$" % add_slash(url))
-        REQUEST_MAPPINGS['GET'].append((re_url, url, method))
+        method.url = url
+        method.re_url = re.compile("^%s$" % add_slash(url))
+        REQUEST_MAPPINGS['GET'].append(method)
         return method
     return wrapped
 
@@ -415,8 +417,9 @@ def post(url):
     """Registers a method as capable of processing POST requests."""
     def wrapped(method):
         # Register.
-        re_url = re.compile("^%s$" % add_slash(url))
-        REQUEST_MAPPINGS['POST'].append((re_url, url, method))
+        method.url = url
+        method.re_url = re.compile("^%s$" % add_slash(url))
+        REQUEST_MAPPINGS['POST'].append(method)
         return method
     return wrapped
 
@@ -425,8 +428,9 @@ def put(url):
     """Registers a method as capable of processing PUT requests."""
     def wrapped(method):
         # Register.
-        re_url = re.compile("^%s$" % add_slash(url))
-        REQUEST_MAPPINGS['PUT'].append((re_url, url, method))
+        method.url = url
+        method.re_url = re.compile("^%s$" % add_slash(url))
+        REQUEST_MAPPINGS['PUT'].append(method)
         new.status = 201
         return method
     return wrapped
@@ -436,8 +440,9 @@ def delete(url):
     """Registers a method as capable of processing DELETE requests."""
     def wrapped(method):
         # Register.
-        re_url = re.compile("^%s$" % add_slash(url))
-        REQUEST_MAPPINGS['DELETE'].append((re_url, url, method))
+        method.url = url
+        method.re_url = re.compile("^%s$" % add_slash(url))
+        REQUEST_MAPPINGS['DELETE'].append(method)
         return method
     return wrapped
 
