@@ -43,6 +43,7 @@ output:
 This is just a first stab to flesh out the idea.
 
 Limitations (i.e. things which could be improved upon):
+
 * You have to define your methods in order from most specific to least specific.
 * Wildcards and 'q' aren't supported yet.
 
