@@ -5,40 +5,41 @@ example code:
 ::
 
   @get('/')
-  @accept('application/x-plist')
+  @accept('text/plain')
   def index(request):
-      return "here we would return a binary plist\n"
+      return "Hello, World!\n"
+  
+  @get('/')
+  @accept('text/xml')
+  def index(request):
+      return '<?xml version="1.0"?><greeting>Hello, World!</greeting>\n'
   
   @get('/')
   @accept('application/json')
   def index(request):
-      return "here we would return JSON\n"
-  
-  @get('/')
-  @accept('text/plain')
-  def index(request):
-      return "here we would return plain text\n"
+      return '{ "greeting": "Hello, World!" }\n'
   
   @get('/')
   def index(request):
-      return "this is the default (returns text/html)\n"
+      return "<html><body>Hello, World!</body></html>\n"
+
 
 output:
 
 ::
 
-  $ wget -q -O - --header='Accept: application/x-plist' http://localhost:8080
-  here we would return a binary plist
-  $ wget -q -O - --header='Accept: application/json' http://localhost:8080
-  here we would return JSON
   $ wget -q -O - --header='Accept: text/plain' http://localhost:8080
-  here we would return plain text
+  Hello, World!
+  
+  $ wget -q -O - --header='Accept: text/xml' http://localhost:8080
+  <?xml version="1.0"?><greeting>Hello, World!</greeting>
+  
+  $ wget -q -O - --header='Accept: application/json' http://localhost:8080
+  { "greeting": "Hello, World!" }
+  
   $ wget -q -O - --header='Accept: text/html' http://localhost:8080
-  this is the default (returns text/html)
-  $ wget -q -O - --header='Accept: */*' http://localhost:8080
-  this is the default (returns text/html)
-  $ wget -q -O - --header='Accept: some/junk' http://localhost:8080
-  this is the default (returns text/html)
+  <html><body>Hello, World!</body></html>
+
 
 This is just a first stab to flesh out the idea.
 
