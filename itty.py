@@ -312,6 +312,20 @@ def handle_error(exception, request=None):
     return not_found(request, exception)
 
 
+def method_supports_mime_type_in_accept_header(method, accept_string):
+    """Determine if the MIME types supported by the method match those in the Accept header."""
+    if hasattr(method, 'accepted_mime_types') == False:
+        # if an @accept() decorator hasn't been used, we assume */*
+        return True
+
+    parts = accept_string.split(',')
+    mime_types_accepted_by_requester = [part.split(';')[0] for part in parts]
+    for mime_type in mime_types_accepted_by_requester:
+        if mime_type in method.accepted_mime_types:
+            return True
+    return False
+
+
 def find_matching_url(request):
     """Searches through the methods who've registed themselves with the HTTP decorators."""
     if not request.method in REQUEST_MAPPINGS:
@@ -320,9 +334,15 @@ def find_matching_url(request):
     for method in REQUEST_MAPPINGS[request.method]:
         match = method.re_url.search(request.path)
 
-        if match is not None:
-            url_set = (method.re_url, method.url, method)
-            return (url_set, match.groupdict())
+        if match == None:
+            continue
+        
+        if hasattr(request, 'HTTP_ACCEPT') == True:
+            if method_supports_mime_type_in_accept_header(method, request.HTTP_ACCEPT) == False:
+                continue
+
+        url_set = (method.re_url, method.url, method)
+        return (url_set, match.groupdict())
 
     raise NotFound("Sorry, nothing here.")
 
@@ -452,6 +472,16 @@ def error(code):
     def wrapped(method):
         # Register.
         ERROR_HANDLERS[code] = method
+        return method
+    return wrapped
+
+
+def accept(mime_type):
+    """Specifies which MIME types a method handles."""
+    def wrapped(method):
+        if method.__dict__.has_key('accepted_mime_types') is False:
+            method.accepted_mime_types = []
+        method.accepted_mime_types.append(mime_type)
         return method
     return wrapped
 
