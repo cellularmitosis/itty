@@ -2,6 +2,8 @@ This is a modified version of itty.py which attempts to add support for the HTTP
 
 example code:
 
+::
+
   @get('/')
   @accept('application/x-plist')
   def index(request):
@@ -22,6 +24,8 @@ example code:
       return "this is the default (returns text/html)\n"
 
 output:
+
+::
 
   $ wget -q -O - --header='Accept: application/x-plist' http://localhost:8080
   here we would return a binary plist
